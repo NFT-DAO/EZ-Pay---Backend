@@ -10,8 +10,9 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { RegisterDTO } from './dto/users.dto';
+import { LoginDTO, RegisterDTO } from './dto/users.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @ApiTags('Users')

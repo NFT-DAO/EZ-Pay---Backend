@@ -6,7 +6,10 @@ import {
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { OrderRequestDto } from './dto/order-request.dto';
+import {
+  OrderPayPalRequestDto,
+  OrderRequestDto,
+} from './dto/order-request.dto';
 import { Model } from 'mongoose';
 import { Transactions } from './entities/transaction.entity';
 import { CardanoService } from './services/cardano/cardano.service';
@@ -48,7 +51,6 @@ export class TransactionsService {
    * @param transactionId
    */
   async changeTransactionStatus(transactionId) {
-
     const transaction = await this.transactionsModel.findOne({
       payment_id: transactionId,
     });
@@ -62,6 +64,32 @@ export class TransactionsService {
     transaction.transactionStatus = 'success';
     return await transaction.save();
   }
+
+  async createPayPalOrder(orderDto: OrderPayPalRequestDto, user) {
+    // Re-calculating price to avoid manually forcing API to charge less
+    const fiatAmount = (
+      parseFloat(String(orderDto.cardanoAmount)) *
+      parseFloat(<string>await this.getPrice())
+    ).toFixed(2);
+
+    // Creating transaction record
+    const transaction = new this.transactionsModel({
+      payment_id: orderDto.payPalTransactionId,
+      ada_address: orderDto.cardanoAddress,
+      quantity: orderDto.cardanoAmount,
+      fiat_amount: fiatAmount,
+      user_id: user.user_id,
+    });
+    try {
+      await transaction.save();
+      return {
+        redirect_url: `${this.frontendUrl}/transaction/${transaction._id}`,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
   async create(orderDto: OrderRequestDto, user) {
     // Re-calculating price to avoid manually forcing API to charge less
     const fiatAmount = (
@@ -108,7 +136,6 @@ export class TransactionsService {
   }
   async getPrice() {
     if (this.configService.get('CARDANO_PRICE_STATIC') === 'false') {
-      console.log('test');
       const price = await axios.get(
         this.configService.get('CARDANO_PRICE_ENDPOINT'),
         {

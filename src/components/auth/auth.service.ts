@@ -15,7 +15,8 @@ export class AuthService {
   async validateUser({ email, password }: LoginDTO): Promise<any> {
     const user = await this.usersService.findByPayload({ email, password });
     if (user) {
-      const { ...result } = user;
+      // && user.password === password) {
+      const { password, ...result } = user;
       return result;
     }
     return null;
@@ -24,7 +25,6 @@ export class AuthService {
   async login(loginDTO: LoginDTO): Promise<AuthResponse> {
     try {
       const user = await this.usersService.findByLogin(loginDTO);
-      console.log(user);
       if (!user) {
         throw new UnauthorizedException('Invalid credentials');
       }
