@@ -3,7 +3,9 @@
 
 This is the code for the EZ Pay backend system that is demonstrated by the EZ Pay front end also in this public repository.
 
-The EZ Pay Backend was completed thanks to Cardano Catalyst funding and is available free to use and to modify.
+The EZ Pay Backend was completed thanks to Cardano Catalyst Fund 5 and was completed in April 2022.
+
+This code is free to use and to modify.
 
 EZ Pay offers your web application the architecture for receiving fiat and Cardano payments.
 
